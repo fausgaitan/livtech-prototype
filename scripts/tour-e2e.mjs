@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
-// E2E for the Guided Showcase: the visual tour auto-runs from a fresh
-// profile, ends with the feedback ask, then the UX tour launches from
-// Prototype Options → "See UX Details". Screenshots every step.
+// E2E for the Guided Showcase: the welcome modal greets a fresh profile
+// and starts the visual tour, which ends with the feedback ask, then the
+// UX tour launches from Prototype Options → "See UX Details". Screenshots
+// every step.
 // Run: node scripts/tour-e2e.mjs
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -52,6 +53,32 @@ page.on('request', (req) => {
     req.continue()
   }
 })
+
+// Wait for the welcome modal, screenshot it, then click one of its two
+// actions: "Start the Tour" or "Explore on my own".
+async function passWelcome(action, shot) {
+  const appeared = await page
+    .waitForFunction(() => document.querySelector('#welcome-modal'), {
+      timeout: 8000,
+    })
+    .then(() => true)
+    .catch(() => false)
+  console.log(appeared ? '✓ welcome modal shown' : '✗ welcome modal missing')
+  if (!appeared) {
+    failures++
+    return false
+  }
+  await new Promise((r) => setTimeout(r, 400)) // let the entry animation settle
+  await page.screenshot({ path: `/tmp/e2e-${shot}.png` })
+  await page.evaluate((label) => {
+    const btn = [...document.querySelectorAll('button')].find(
+      (b) => b.textContent?.trim() === label,
+    )
+    btn?.click()
+  }, action)
+  await new Promise((r) => setTimeout(r, 300))
+  return true
+}
 
 async function clickTourNext() {
   return page.evaluate(() => {
@@ -161,8 +188,9 @@ async function runTour(name, titles, shot, interact = true) {
   }
 }
 
-// --- Visual tour: auto-runs on first load -----------------------------------
+// --- Welcome modal → visual tour on first load -------------------------------
 await page.goto(`${BASE}/`, { waitUntil: 'networkidle0' })
+await passWelcome('Start the Tour', 'welcome')
 await runTour('visual', visualTitles, 'visual')
 
 await new Promise((r) => setTimeout(r, 800))
@@ -208,8 +236,23 @@ console.log('after ux tour:', JSON.stringify(after))
 if (!after.modalGone || !after.drawerGone) failures++
 await page.screenshot({ path: '/tmp/e2e-after.png' })
 
-// Reload — the tour should auto-run again on every refresh
+// Reload — the welcome modal should greet again on every refresh, now with
+// the already-submitted note, and Start should launch the tour.
 await page.reload({ waitUntil: 'networkidle0' })
+const submittedNote = await page
+  .waitForFunction(
+    () => document.body.innerText.includes('You already submitted feedback'),
+    { timeout: 8000 },
+  )
+  .then(() => true)
+  .catch(() => false)
+console.log(
+  submittedNote
+    ? '✓ welcome modal shows already-submitted note'
+    : '✗ already-submitted note missing',
+)
+if (!submittedNote) failures++
+await passWelcome('Start the Tour', 'welcome-resubmit')
 const autoReran = await page
   .waitForFunction(
     () => document.body.innerText.includes('Option A - Bold & Structured'),
@@ -218,7 +261,7 @@ const autoReran = await page
   .then(() => true)
   .catch(() => false)
 console.log(
-  autoReran ? '✓ tour auto-runs after reload' : '✗ tour did not auto-run after reload',
+  autoReran ? '✓ tour starts after reload' : '✗ tour did not start after reload',
 )
 if (!autoReran) failures++
 
@@ -265,6 +308,17 @@ const afterReset = await page.evaluate((prevId) => {
 console.log('after reset:', JSON.stringify(afterReset))
 if (!afterReset.tagGone || !afterReset.answersCleared || !afterReset.freshId)
   failures++
+
+// --- Welcome modal skip path: no tour, app fully explorable ------------------
+await page.reload({ waitUntil: 'networkidle0' })
+await passWelcome('Explore on my own', 'welcome-skip')
+await new Promise((r) => setTimeout(r, 800))
+const afterSkip = await page.evaluate(() => ({
+  modalGone: !document.querySelector('#welcome-modal'),
+  noTour: !document.body.innerText.includes('Option A - Bold & Structured'),
+}))
+console.log('after welcome skip:', JSON.stringify(afterSkip))
+if (!afterSkip.modalGone || !afterSkip.noTour) failures++
 
 await browser.close()
 console.log(failures === 0 ? 'ALL PASS' : `${failures} FAILURE(S)`)

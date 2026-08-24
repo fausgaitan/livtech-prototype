@@ -18,13 +18,15 @@ import {
 } from 'react-joyride'
 
 import { useVariant, type VariantKey } from '@/lib/variant'
+import { WelcomeModal } from '@/components/prototype/WelcomeModal'
 
 /**
  * Guided Showcase — Atomic Health branded react-joyride tours.
  *
  * Two separate tours so the client isn't firehosed:
- * - `visual` (auto-runs once): the three design directions + chart palette,
- *   closing with a feedback ask. Theme switches live per step.
+ * - `visual` (offered by the welcome modal on every load): the three design
+ *   directions + chart palette, closing with a feedback ask. Theme switches
+ *   live per step.
  * - `ux` (launched from "See UX Details" in Prototype Options): sidebar
  *   collapse, product switcher, modal, and drawer, presented in Option C.
  */
@@ -579,6 +581,9 @@ export function GuidedShowcaseProvider({ children }: { children: ReactNode }) {
   const [tourElement, setTourElement] = useState<TourElement>(null)
   // Submitted viewers get the short visual tour (style steps only).
   const [visualShort, setVisualShort] = useState(false)
+  // Welcome modal gates the auto-run tour: intro first, then Start / skip.
+  const [welcomeOpen, setWelcomeOpen] = useState(false)
+  const [welcomeName, setWelcomeName] = useState('')
 
   // Keep live values in refs so the Joyride handlers stay stable while
   // the tour navigates between pages.
@@ -589,8 +594,9 @@ export function GuidedShowcaseProvider({ children }: { children: ReactNode }) {
   const tourRef = useRef(tour)
   tourRef.current = tour
 
-  // Auto-run the visual tour on every page load/refresh. Prior answers are
-  // preserved, so a re-run doubles as an edit flow.
+  // Open the welcome modal on every page load/refresh; the visual tour only
+  // starts once the viewer clicks Start. Prior answers are preserved, so a
+  // re-run doubles as an edit flow.
   useEffect(() => {
     // Personalized links: ?name=Jane pre-fills the submitter identity, so
     // feedback is attributable without the viewer typing anything.
@@ -598,8 +604,9 @@ export function GuidedShowcaseProvider({ children }: { children: ReactNode }) {
     const name = new URLSearchParams(window.location.search).get('name')
     if (name) writeFeedback({ name })
 
+    setWelcomeName(readFeedback().name ?? '')
     setVisualShort(hasSubmittedFeedback())
-    setRun(true)
+    setWelcomeOpen(true)
   }, [])
 
   const startTour = useCallback(
@@ -686,6 +693,16 @@ export function GuidedShowcaseProvider({ children }: { children: ReactNode }) {
       value={{ startTour, tourActive: run, tourElement }}
     >
       {children}
+      <WelcomeModal
+        open={welcomeOpen}
+        name={welcomeName}
+        submitted={visualShort}
+        onStart={() => {
+          setWelcomeOpen(false)
+          startTour('visual')
+        }}
+        onSkip={() => setWelcomeOpen(false)}
+      />
       <Joyride
         steps={
           tour === 'visual' && visualShort
