@@ -68,35 +68,55 @@ export function WelcomeModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300"
       style={{ backgroundColor: 'rgba(15, 30, 46, 0.45)' }}
       onClick={onSkip}
     >
       <div
-        id="welcome-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Welcome to the Livtech UI Prototype"
-        className="w-full max-w-[480px] rounded-2xl border bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-        style={{ borderColor: atomic.border }}
+        className="relative w-full max-w-[480px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* One panel at a time — keyed so each slide animates in */}
+        {/* Aurora glow drifting behind the panel — the design-firm calling card */}
+        <div
+          aria-hidden
+          className="welcome-halo absolute -inset-5 rounded-[36px] opacity-50"
+          style={{
+            background:
+              'conic-gradient(from 120deg, #885cf6, #7cb9e8, #4cc3b0, #a58bfa, #885cf6)',
+          }}
+        />
+        <div
+          id="welcome-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Welcome to the Livtech UI Prototype"
+          className="welcome-pop relative w-full rounded-2xl border bg-white p-6 shadow-2xl"
+          style={{ borderColor: atomic.border }}
+        >
+        {/* One panel at a time — keyed so the stagger replays per slide */}
         <div
           key={panel}
-          className="flex min-h-[230px] flex-col items-center justify-center gap-4 px-2 py-6 text-center animate-in fade-in slide-in-from-right-2 duration-200"
+          className="flex min-h-[230px] flex-col items-center justify-center gap-4 px-2 py-6 text-center"
         >
-          <div
-            className="flex size-14 items-center justify-center rounded-full border"
-            style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
-          >
-            <Icon className="size-6" style={{ color: atomic.text }} />
+          <div className="relative animate-in fade-in zoom-in-50 duration-500 [animation-delay:150ms] [animation-fill-mode:backwards]">
+            {/* One-time ring burst as the chip lands */}
+            <span
+              aria-hidden
+              className="welcome-ring absolute inset-0 rounded-full border-2"
+              style={{ borderColor: '#885cf6' }}
+            />
+            <div
+              className="flex size-14 items-center justify-center rounded-full border"
+              style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
+            >
+              <Icon className="size-6" style={{ color: atomic.text }} />
+            </div>
           </div>
-          <h2 className="text-2xl font-semibold" style={{ color: atomic.text }}>
+          <h2 className="welcome-title text-2xl font-semibold animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:250ms] [animation-fill-mode:backwards]">
             {title}
           </h2>
           <p
-            className="max-w-[380px] text-base leading-relaxed"
+            className="max-w-[380px] text-base leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:400ms] [animation-fill-mode:backwards]"
             style={{ color: `${atomic.text}b3` }}
           >
             {body}
@@ -116,7 +136,7 @@ export function WelcomeModal({
         </div>
 
         {/* Dots + actions: Next until the last panel, then Start / later */}
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex items-center justify-between animate-in fade-in duration-500 [animation-delay:550ms] [animation-fill-mode:backwards]">
           <div className="flex gap-1.5">
             {panels.map((p, i) => (
               <button
@@ -160,15 +180,20 @@ export function WelcomeModal({
           </div>
         </div>
 
-        {/* Brand footer, same treatment as the Prototype Options panel */}
-        <div
-          className="mt-5 flex items-center justify-end gap-1.5 border-t pt-3"
-          style={{ borderColor: atomic.border }}
-        >
-          <span className="text-xs" style={{ color: `${atomic.text}99` }}>
-            by
-          </span>
-          <img src={atomicLogo} alt="Atomic Health" className="h-[22px] w-auto" />
+          {/* Brand footer, same treatment as the Prototype Options panel */}
+          <div
+            className="mt-5 flex items-center justify-end gap-1.5 border-t pt-3 animate-in fade-in duration-500 [animation-delay:650ms] [animation-fill-mode:backwards]"
+            style={{ borderColor: atomic.border }}
+          >
+            <span className="text-xs" style={{ color: `${atomic.text}99` }}>
+              by
+            </span>
+            <img
+              src={atomicLogo}
+              alt="Atomic Health"
+              className="h-[22px] w-auto"
+            />
+          </div>
         </div>
       </div>
     </div>
