@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * Livtech theme — shadcndesign.com neutral kit
+ * Neutral scale: 50 #F7F7F7 · 100 #E6E6E6 · 200 #C8C8C8 · 300 #ADADAD
+ *   400 #9F9F9F · 500 #888888 · 600 #7A7A7A · 700 #575757
+ *   800 #343434 · 900 #242324 · 950 #1A191A
+ * Red (destructive) states: 100 #FFE2E2 · 300 #FCA5A5 · 500 #EF4444
+ *   600 #DC2626 · 700 #B91C1C
+ * Indigo (brand/primary): 50 #F5F3FF · 100 #EDE9FE · 200 #DCD6FE · 300 #C3B5FD
+ *   400 #A58BFA · 500 #885CF6 · 600 #793AED · 700 #6A28D9
+ *   800 #5821B6 · 900 #421A85 · 950 #2C1065
+ */
+:root {
+    --background: #ffffff;
+    --foreground: #1a191a;
+    --card: #ffffff;
+    --card-foreground: #1a191a;
+    --popover: #ffffff;
+    --popover-foreground: #1a191a;
+    --primary: #793aed;
+    --primary-foreground: #ffffff;
+    --secondary: #f7f7f7;
+    --secondary-foreground: #242324;
+    --muted: #f7f7f7;
+    --muted-foreground: #7a7a7a;
+    --accent: #f7f7f7;
+    --accent-foreground: #242324;
+    --destructive: #ef4444;
+    --border: #e6e6e6;
+    --input: #e6e6e6;
+    --ring: #793aed;
+    --chart-1: #793aed;
+    --chart-2: #575757;
+    --chart-3: #888888;
+    --chart-4: #adadad;
+    --chart-5: #c8c8c8;
+    --radius: 0.625rem;
+    --sidebar: #f7f7f7;
+    --sidebar-foreground: #1a191a;
+    --sidebar-primary: #793aed;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e6e6e6;
+    --sidebar-accent-foreground: #242324;
+    --sidebar-border: #e6e6e6;
+    --sidebar-ring: #793aed;
+}
+
+.dark {
+    --background: #1a191a;
+    --foreground: #f7f7f7;
+    --card: #242324;
+    --card-foreground: #f7f7f7;
+    --popover: #242324;
+    --popover-foreground: #f7f7f7;
+    --primary: #885cf6;
+    --primary-foreground: #ffffff;
+    --secondary: #343434;
+    --secondary-foreground: #f7f7f7;
+    --muted: #343434;
+    --muted-foreground: #adadad;
+    --accent: #343434;
+    --accent-foreground: #f7f7f7;
+    --destructive: #dc2626;
+    --border: #343434;
+    --input: #343434;
+    --ring: #885cf6;
+    --chart-1: #885cf6;
+    --chart-2: #adadad;
+    --chart-3: #888888;
+    --chart-4: #575757;
+    --chart-5: #343434;
+    --sidebar: #242324;
+    --sidebar-foreground: #f7f7f7;
+    --sidebar-primary: #885cf6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #343434;
+    --sidebar-accent-foreground: #f7f7f7;
+    --sidebar-border: #343434;
+    --sidebar-ring: #885cf6;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  html {
+    @apply font-sans;
+    }
+}
