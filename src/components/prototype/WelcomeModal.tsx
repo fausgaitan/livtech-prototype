@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Layers, MessageSquareText, Compass } from 'lucide-react'
+import { Layers, MessageSquareText, Compass, Info } from 'lucide-react'
 
 import atomicLogo from '@/assets/atomic-health-logo.svg'
 
@@ -72,8 +72,8 @@ export function WelcomeModal({
         role="dialog"
         aria-modal="true"
         aria-label="Welcome to the Livtech UI Prototype"
-        className="w-full max-w-[480px] rounded-2xl border p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
-        style={{ backgroundColor: atomic.bg, borderColor: atomic.border }}
+        className="w-full max-w-[480px] rounded-2xl border bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+        style={{ borderColor: atomic.border }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2
@@ -90,9 +90,10 @@ export function WelcomeModal({
         <div className="mt-5 grid gap-4">
           {sections.map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex gap-3">
+              {/* Ice-blue chips carry the Atomic branding on the white panel */}
               <div
                 className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border"
-                style={{ borderColor: atomic.border, backgroundColor: '#ffffff' }}
+                style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
               >
                 <Icon className="size-4" style={{ color: atomic.text }} />
               </div>
@@ -111,6 +112,22 @@ export function WelcomeModal({
           ))}
         </div>
 
+        {/* Expectation-setting: it looks real, but it's a visual prototype */}
+        <div
+          className="mt-5 flex items-start gap-2 rounded-lg border px-3 py-2.5"
+          style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
+        >
+          <Info
+            className="mt-px size-3.5 shrink-0"
+            style={{ color: `${atomic.text}99` }}
+          />
+          <p className="text-xs leading-relaxed" style={{ color: `${atomic.text}bf` }}>
+            This is a visual prototype, not a working app: most components,
+            like tabs, buttons, and links, are not clickable. You are here to
+            judge the look and feel.
+          </p>
+        </div>
+
         {submitted && (
           <p
             className="mt-4 rounded-lg px-3 py-2 text-xs"
@@ -127,7 +144,7 @@ export function WelcomeModal({
         <div className="mt-6 flex items-center justify-end gap-2">
           <button
             onClick={onSkip}
-            className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-white/60"
+            className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-[#eaf6fe]"
             style={{ color: `${atomic.text}99` }}
           >
             Maybe later
