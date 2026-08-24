@@ -6,7 +6,8 @@ import App from './App.tsx'
 // Note: StrictMode is intentionally off — its dev-only double-mount spawns
 // two racing react-joyride instances and breaks the Guided Showcase tour.
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  // basename keeps react-router working under GitHub Pages' /<repo>/ subpath
+  <BrowserRouter basename={import.meta.env.BASE_URL}>
     <App />
   </BrowserRouter>,
 )
