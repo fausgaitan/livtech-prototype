@@ -1,13 +1,14 @@
-import { useEffect } from 'react'
-import { Layers, MessageSquareText, Compass, Info } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Layers, MessageSquareText, Info } from 'lucide-react'
 
 import atomicLogo from '@/assets/atomic-health-logo.svg'
 
 /**
- * Welcome modal — the first thing a reviewer sees, before the Guided
- * Showcase starts. Sets context: what this prototype is, what we'll ask,
- * and how to review and leave feedback. Atomic Health prototype-chrome
- * branding, matching Prototype Options and the tour tooltips.
+ * Welcome modal — a three-panel intro shown before the Guided Showcase.
+ * One big idea per panel, large type, minimal words:
+ *   1. What this is  2. Your input is key  3. Prototype disclaimer
+ * The final panel carries the Start the Tour / Maybe later actions.
+ * Atomic Health prototype-chrome branding on a white dialog.
  */
 
 const atomic = {
@@ -15,24 +16,6 @@ const atomic = {
   border: '#cde8fa',
   text: '#0f1e2e',
 }
-
-const sections = [
-  {
-    icon: Layers,
-    title: 'What this is',
-    body: 'A working prototype of the new Livtech UI. Three visual directions (Options A, B, and C) are applied to two real screens: the CRM Dashboard and Clinical Prospects.',
-  },
-  {
-    icon: MessageSquareText,
-    title: "What we'll ask",
-    body: 'A two-minute guided tour walks you through each direction, then asks for your favorite and least favorite. Your vote directly decides the direction we build, so please submit before you leave. Comments are optional.',
-  },
-  {
-    icon: Compass,
-    title: 'How to review',
-    body: 'Answers save as you go, so you can move at your own pace. After the tour, explore freely: Prototype Options in the bottom right switches styles, replays the tour, and opens the UX details walkthrough.',
-  },
-]
 
 export function WelcomeModal({
   open,
@@ -49,7 +32,9 @@ export function WelcomeModal({
   onStart: () => void
   onSkip: () => void
 }) {
-  // Esc closes the modal the same way "Explore on my own" does.
+  const [panel, setPanel] = useState(0)
+
+  // Esc closes the modal the same way "Maybe later" does.
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -60,6 +45,26 @@ export function WelcomeModal({
   }, [open, onSkip])
 
   if (!open) return null
+
+  const panels = [
+    {
+      icon: Layers,
+      title: name ? `Hi ${name}!` : 'Welcome!',
+      body: 'This is a preview of the new Livtech UI. Same app, three different visual styles: A, B, and C.',
+    },
+    {
+      icon: MessageSquareText,
+      title: 'Your input is key!',
+      body: 'A two-minute tour walks you through each style, then asks for your favorite and least favorite. That is it.',
+    },
+    {
+      icon: Info,
+      title: 'Before you start',
+      body: 'This is a visual prototype, so most buttons, tabs, and links are not clickable. You are here to judge the look and feel.',
+    },
+  ]
+  const last = panel === panels.length - 1
+  const { icon: Icon, title, body } = panels[panel]
 
   return (
     <div
@@ -76,86 +81,83 @@ export function WelcomeModal({
         style={{ borderColor: atomic.border }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          className="text-lg font-semibold"
-          style={{ color: atomic.text }}
-        >
-          {name ? `Hi ${name}, welcome!` : 'Welcome!'}
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: `${atomic.text}b3` }}>
-          We are choosing between three design directions for the Livtech UI,
-          and your vote decides it. Here is a quick orientation first.
-        </p>
-
-        <div className="mt-5 grid gap-4">
-          {sections.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="flex gap-3">
-              {/* Ice-blue chips carry the Atomic branding on the white panel */}
-              <div
-                className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border"
-                style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
-              >
-                <Icon className="size-4" style={{ color: atomic.text }} />
-              </div>
-              <div>
-                <p className="text-sm font-medium" style={{ color: atomic.text }}>
-                  {title}
-                </p>
-                <p
-                  className="mt-0.5 text-[13px] leading-relaxed"
-                  style={{ color: `${atomic.text}b3` }}
-                >
-                  {body}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Expectation-setting: it looks real, but it's a visual prototype */}
+        {/* One panel at a time — keyed so each slide animates in */}
         <div
-          className="mt-5 flex items-start gap-2 rounded-lg border px-3 py-2.5"
-          style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
+          key={panel}
+          className="flex min-h-[230px] flex-col items-center justify-center gap-4 px-2 py-6 text-center animate-in fade-in slide-in-from-right-2 duration-200"
         >
-          <Info
-            className="mt-px size-3.5 shrink-0"
-            style={{ color: `${atomic.text}99` }}
-          />
-          <p className="text-xs leading-relaxed" style={{ color: `${atomic.text}bf` }}>
-            This is a visual prototype, not a working app: most components,
-            like tabs, buttons, and links, are not clickable. You are here to
-            judge the look and feel.
+          <div
+            className="flex size-14 items-center justify-center rounded-full border"
+            style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
+          >
+            <Icon className="size-6" style={{ color: atomic.text }} />
+          </div>
+          <h2 className="text-2xl font-semibold" style={{ color: atomic.text }}>
+            {title}
+          </h2>
+          <p
+            className="max-w-[380px] text-base leading-relaxed"
+            style={{ color: `${atomic.text}b3` }}
+          >
+            {body}
           </p>
+          {last && submitted && (
+            <p
+              className="rounded-lg px-3 py-2 text-sm"
+              style={{
+                backgroundColor: 'rgba(15, 30, 46, 0.06)',
+                color: `${atomic.text}bf`,
+              }}
+            >
+              You already submitted feedback, thank you! This time the tour
+              simply replays the three styles.
+            </p>
+          )}
         </div>
 
-        {submitted && (
-          <p
-            className="mt-4 rounded-lg px-3 py-2 text-xs"
-            style={{
-              backgroundColor: 'rgba(15, 30, 46, 0.06)',
-              color: `${atomic.text}bf`,
-            }}
-          >
-            You already submitted feedback, thank you! This time the tour
-            simply replays the three style directions.
-          </p>
-        )}
-
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            onClick={onSkip}
-            className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-[#eaf6fe]"
-            style={{ color: `${atomic.text}99` }}
-          >
-            Maybe later
-          </button>
-          <button
-            onClick={onStart}
-            className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-opacity hover:opacity-90"
-            style={{ backgroundColor: atomic.text }}
-          >
-            Start the Tour
-          </button>
+        {/* Dots + actions: Next until the last panel, then Start / later */}
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex gap-1.5">
+            {panels.map((p, i) => (
+              <button
+                key={p.title}
+                onClick={() => setPanel(i)}
+                aria-label={`Go to step ${i + 1}`}
+                className="size-2 rounded-full transition-colors"
+                style={{
+                  backgroundColor: i === panel ? atomic.text : atomic.border,
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            {last ? (
+              <>
+                <button
+                  onClick={onSkip}
+                  className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-[#eaf6fe]"
+                  style={{ color: `${atomic.text}99` }}
+                >
+                  Maybe later
+                </button>
+                <button
+                  onClick={onStart}
+                  className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: atomic.text }}
+                >
+                  Start the Tour
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setPanel(panel + 1)}
+                className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-opacity hover:opacity-90"
+                style={{ backgroundColor: atomic.text }}
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Brand footer, same treatment as the Prototype Options panel */}

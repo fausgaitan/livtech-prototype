@@ -54,9 +54,20 @@ page.on('request', (req) => {
   }
 })
 
-// Wait for the welcome modal, screenshot it, then click one of its two
-// actions: "Start the Tour" or "Maybe later".
-async function passWelcome(action, shot) {
+// Click a button inside the welcome modal by its exact label.
+async function clickWelcome(label) {
+  await page.evaluate((text) => {
+    const btn = [
+      ...document.querySelectorAll('#welcome-modal button'),
+    ].find((b) => b.textContent?.trim() === text)
+    btn?.click()
+  }, label)
+  await new Promise((r) => setTimeout(r, 300))
+}
+
+// Wait for the welcome modal, then page through the three intro panels
+// (Next × 2) so the Start the Tour / Maybe later actions are on screen.
+async function openWelcomeActions(shot) {
   const appeared = await page
     .waitForFunction(() => document.querySelector('#welcome-modal'), {
       timeout: 8000,
@@ -69,15 +80,22 @@ async function passWelcome(action, shot) {
     return false
   }
   await new Promise((r) => setTimeout(r, 400)) // let the entry animation settle
+  await page.screenshot({ path: `/tmp/e2e-${shot}-p1.png` })
+  await clickWelcome('Next')
+  await clickWelcome('Next')
+  const onLastPanel = await page.evaluate(() =>
+    [...document.querySelectorAll('#welcome-modal button')].some(
+      (b) => b.textContent?.trim() === 'Start the Tour',
+    ),
+  )
+  console.log(
+    onLastPanel
+      ? '✓ welcome panels paged to actions'
+      : '✗ welcome panels did not reach actions',
+  )
+  if (!onLastPanel) failures++
   await page.screenshot({ path: `/tmp/e2e-${shot}.png` })
-  await page.evaluate((label) => {
-    const btn = [...document.querySelectorAll('button')].find(
-      (b) => b.textContent?.trim() === label,
-    )
-    btn?.click()
-  }, action)
-  await new Promise((r) => setTimeout(r, 300))
-  return true
+  return onLastPanel
 }
 
 async function clickTourNext() {
@@ -190,7 +208,8 @@ async function runTour(name, titles, shot, interact = true) {
 
 // --- Welcome modal → visual tour on first load -------------------------------
 await page.goto(`${BASE}/`, { waitUntil: 'networkidle0' })
-await passWelcome('Start the Tour', 'welcome')
+await openWelcomeActions('welcome')
+await clickWelcome('Start the Tour')
 await runTour('visual', visualTitles, 'visual')
 
 await new Promise((r) => setTimeout(r, 800))
@@ -247,23 +266,20 @@ console.log('after ux tour:', JSON.stringify(after))
 if (!after.modalGone || !after.drawerGone) failures++
 await page.screenshot({ path: '/tmp/e2e-after.png' })
 
-// Reload — the welcome modal should greet again on every refresh, now with
-// the already-submitted note, and Start should launch the tour.
+// Reload — the welcome modal should greet again on every refresh, with the
+// already-submitted note on its final panel, and Start should launch the tour.
 await page.reload({ waitUntil: 'networkidle0' })
-const submittedNote = await page
-  .waitForFunction(
-    () => document.body.innerText.includes('You already submitted feedback'),
-    { timeout: 8000 },
-  )
-  .then(() => true)
-  .catch(() => false)
+await openWelcomeActions('welcome-resubmit')
+const submittedNote = await page.evaluate(() =>
+  document.body.innerText.includes('You already submitted feedback'),
+)
 console.log(
   submittedNote
     ? '✓ welcome modal shows already-submitted note'
     : '✗ already-submitted note missing',
 )
 if (!submittedNote) failures++
-await passWelcome('Start the Tour', 'welcome-resubmit')
+await clickWelcome('Start the Tour')
 const autoReran = await page
   .waitForFunction(
     () => document.body.innerText.includes('Option A - Bold & Structured'),
@@ -322,7 +338,8 @@ if (!afterReset.tagGone || !afterReset.answersCleared || !afterReset.freshId)
 
 // --- Welcome modal skip path: nudge keeps pushing for the vote ---------------
 await page.reload({ waitUntil: 'networkidle0' })
-await passWelcome('Maybe later', 'welcome-skip')
+await openWelcomeActions('welcome-skip')
+await clickWelcome('Maybe later')
 await new Promise((r) => setTimeout(r, 800))
 const afterSkip = await page.evaluate(() => ({
   modalGone: !document.querySelector('#welcome-modal'),
