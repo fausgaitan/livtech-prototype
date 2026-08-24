@@ -55,7 +55,7 @@ page.on('request', (req) => {
 })
 
 // Wait for the welcome modal, screenshot it, then click one of its two
-// actions: "Start the Tour" or "Explore on my own".
+// actions: "Start the Tour" or "Maybe later".
 async function passWelcome(action, shot) {
   const appeared = await page
     .waitForFunction(() => document.querySelector('#welcome-modal'), {
@@ -215,6 +215,17 @@ if (
   console.log('✗ feedback not persisted correctly')
 }
 
+// Submitted → the vote nudge must be retired.
+const nudgeGone = await page.evaluate(
+  () => !document.body.innerText.includes('Vote on the 3 styles'),
+)
+console.log(
+  nudgeGone
+    ? '✓ nudge hidden after submission'
+    : '✗ nudge still visible after submission',
+)
+if (!nudgeGone) failures++
+
 // --- UX tour: launched from Prototype Options -------------------------------
 await page.click('#prototype-options')
 await page.evaluate(() => {
@@ -309,16 +320,39 @@ console.log('after reset:', JSON.stringify(afterReset))
 if (!afterReset.tagGone || !afterReset.answersCleared || !afterReset.freshId)
   failures++
 
-// --- Welcome modal skip path: no tour, app fully explorable ------------------
+// --- Welcome modal skip path: nudge keeps pushing for the vote ---------------
 await page.reload({ waitUntil: 'networkidle0' })
-await passWelcome('Explore on my own', 'welcome-skip')
+await passWelcome('Maybe later', 'welcome-skip')
 await new Promise((r) => setTimeout(r, 800))
 const afterSkip = await page.evaluate(() => ({
   modalGone: !document.querySelector('#welcome-modal'),
   noTour: !document.body.innerText.includes('Option A - Bold & Structured'),
+  nudgeShown: document.body.innerText.includes('Vote on the 3 styles'),
 }))
 console.log('after welcome skip:', JSON.stringify(afterSkip))
-if (!afterSkip.modalGone || !afterSkip.noTour) failures++
+if (!afterSkip.modalGone || !afterSkip.noTour || !afterSkip.nudgeShown)
+  failures++
+await page.screenshot({ path: '/tmp/e2e-nudge.png' })
+
+// Clicking the nudge launches the full visual tour (feedback was reset above,
+// so the question steps are back in play).
+await page.evaluate(() => {
+  const btn = [...document.querySelectorAll('button')].find((b) =>
+    b.textContent?.includes('Vote on the 3 styles'),
+  )
+  btn?.click()
+})
+const nudgeStarts = await page
+  .waitForFunction(
+    () => document.body.innerText.includes('Option A - Bold & Structured'),
+    { timeout: 8000 },
+  )
+  .then(() => true)
+  .catch(() => false)
+console.log(
+  nudgeStarts ? '✓ nudge launches the tour' : '✗ nudge did not launch the tour',
+)
+if (!nudgeStarts) failures++
 
 await browser.close()
 console.log(failures === 0 ? 'ALL PASS' : `${failures} FAILURE(S)`)

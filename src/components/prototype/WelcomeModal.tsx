@@ -25,7 +25,7 @@ const sections = [
   {
     icon: MessageSquareText,
     title: "What we'll ask",
-    body: 'A short guided tour walks you through each direction, then asks which style is your favorite and least favorite. It takes about two minutes, and comments are optional.',
+    body: 'A two-minute guided tour walks you through each direction, then asks for your favorite and least favorite. Your vote directly decides the direction we build, so please submit before you leave. Comments are optional.',
   },
   {
     icon: Compass,
@@ -83,8 +83,8 @@ export function WelcomeModal({
           {name ? `Hi ${name}, welcome!` : 'Welcome!'}
         </h2>
         <p className="mt-1 text-sm" style={{ color: `${atomic.text}b3` }}>
-          Before you dive into the Livtech UI prototype, here is a quick
-          orientation.
+          We are choosing between three design directions for the Livtech UI,
+          and your vote decides it. Here is a quick orientation first.
         </p>
 
         <div className="mt-5 grid gap-4">
@@ -130,7 +130,7 @@ export function WelcomeModal({
             className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-white/60"
             style={{ color: `${atomic.text}99` }}
           >
-            Explore on my own
+            Maybe later
           </button>
           <button
             onClick={onStart}

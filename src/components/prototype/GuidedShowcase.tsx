@@ -19,6 +19,7 @@ import {
 
 import { useVariant, type VariantKey } from '@/lib/variant'
 import { WelcomeModal } from '@/components/prototype/WelcomeModal'
+import { FeedbackNudge } from '@/components/prototype/FeedbackNudge'
 
 /**
  * Guided Showcase — Atomic Health branded react-joyride tours.
@@ -702,6 +703,13 @@ export function GuidedShowcaseProvider({ children }: { children: ReactNode }) {
           startTour('visual')
         }}
         onSkip={() => setWelcomeOpen(false)}
+      />
+      {/* Standing ask until feedback lands — the vote is the whole point.
+          Visibility re-evaluates on tour start/end and modal close, which
+          covers every path that could reveal or retire the nudge. */}
+      <FeedbackNudge
+        visible={!run && !welcomeOpen && !hasSubmittedFeedback()}
+        onClick={() => startTour('visual')}
       />
       <Joyride
         steps={
