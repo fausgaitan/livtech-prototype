@@ -33,6 +33,18 @@ export function WelcomeModal({
   onSkip: () => void
 }) {
   const [panel, setPanel] = useState(0)
+  // The full staggered entrance plays exactly once; after it settles (or the
+  // viewer pages on), panel changes use a quick crossfade instead — replaying
+  // the stagger left blank frames while children waited out their delays.
+  const [entered, setEntered] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 1200)
+    return () => clearTimeout(t)
+  }, [])
+  const goTo = (i: number) => {
+    setEntered(true)
+    setPanel(i)
+  }
 
   // Esc closes the modal the same way "Maybe later" does.
   useEffect(() => {
@@ -55,7 +67,7 @@ export function WelcomeModal({
     {
       icon: MessageSquareText,
       title: 'Your input is key!',
-      body: 'A two-minute tour walks you through each style, then asks for your favorite and least favorite. That is it.',
+      body: 'A quick tour walks you through each style, then asks for your favorite and least favorite. That is it.',
     },
     {
       icon: Info,
@@ -93,18 +105,30 @@ export function WelcomeModal({
           className="welcome-pop relative w-full rounded-2xl border bg-white p-6 shadow-2xl"
           style={{ borderColor: atomic.border }}
         >
-        {/* One panel at a time — keyed so the stagger replays per slide */}
+        {/* One panel at a time — entrance staggers once, then quick crossfades */}
         <div
           key={panel}
-          className="flex min-h-[230px] flex-col items-center justify-center gap-4 px-2 py-6 text-center"
+          className={`flex min-h-[230px] flex-col items-center justify-center gap-4 px-2 py-6 text-center ${
+            entered
+              ? 'animate-in fade-in slide-in-from-right-4 duration-300 ease-out'
+              : ''
+          }`}
         >
-          <div className="relative animate-in fade-in zoom-in-50 duration-500 [animation-delay:150ms] [animation-fill-mode:backwards]">
-            {/* One-time ring burst as the chip lands */}
-            <span
-              aria-hidden
-              className="welcome-ring absolute inset-0 rounded-full border-2"
-              style={{ borderColor: '#885cf6' }}
-            />
+          <div
+            className={`relative ${
+              entered
+                ? ''
+                : 'animate-in fade-in zoom-in-50 duration-500 [animation-delay:150ms] [animation-fill-mode:backwards]'
+            }`}
+          >
+            {/* One-time ring burst as the chip lands on first open */}
+            {!entered && (
+              <span
+                aria-hidden
+                className="welcome-ring absolute inset-0 rounded-full border-2"
+                style={{ borderColor: '#885cf6' }}
+              />
+            )}
             <div
               className="flex size-14 items-center justify-center rounded-full border"
               style={{ borderColor: atomic.border, backgroundColor: atomic.bg }}
@@ -112,11 +136,21 @@ export function WelcomeModal({
               <Icon className="size-6" style={{ color: atomic.text }} />
             </div>
           </div>
-          <h2 className="welcome-title text-2xl font-semibold animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:250ms] [animation-fill-mode:backwards]">
+          <h2
+            className={`welcome-title text-2xl font-semibold ${
+              entered
+                ? ''
+                : 'animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:250ms] [animation-fill-mode:backwards]'
+            }`}
+          >
             {title}
           </h2>
           <p
-            className="max-w-[380px] text-base leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:400ms] [animation-fill-mode:backwards]"
+            className={`max-w-[380px] text-base leading-relaxed ${
+              entered
+                ? ''
+                : 'animate-in fade-in slide-in-from-bottom-3 duration-500 [animation-delay:400ms] [animation-fill-mode:backwards]'
+            }`}
             style={{ color: `${atomic.text}b3` }}
           >
             {body}
@@ -141,10 +175,11 @@ export function WelcomeModal({
             {panels.map((p, i) => (
               <button
                 key={p.title}
-                onClick={() => setPanel(i)}
+                onClick={() => goTo(i)}
                 aria-label={`Go to step ${i + 1}`}
-                className="size-2 rounded-full transition-colors"
+                className="h-2 rounded-full transition-all duration-300"
                 style={{
+                  width: i === panel ? 20 : 8,
                   backgroundColor: i === panel ? atomic.text : atomic.border,
                 }}
               />
@@ -155,14 +190,14 @@ export function WelcomeModal({
               <>
                 <button
                   onClick={onSkip}
-                  className="h-10 rounded-full px-4 text-sm font-medium transition-colors hover:bg-[#eaf6fe]"
+                  className="h-10 rounded-full px-4 text-sm font-medium transition-all duration-200 hover:bg-[#eaf6fe] active:scale-95"
                   style={{ color: `${atomic.text}99` }}
                 >
                   Maybe later
                 </button>
                 <button
                   onClick={onStart}
-                  className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-opacity hover:opacity-90"
+                  className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-95"
                   style={{ backgroundColor: atomic.text }}
                 >
                   Start the Tour
@@ -170,8 +205,8 @@ export function WelcomeModal({
               </>
             ) : (
               <button
-                onClick={() => setPanel(panel + 1)}
-                className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-opacity hover:opacity-90"
+                onClick={() => goTo(panel + 1)}
+                className="h-10 rounded-full px-5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:opacity-90 active:scale-95"
                 style={{ backgroundColor: atomic.text }}
               >
                 Next

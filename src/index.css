@@ -146,9 +146,7 @@
  * All of it stands down under prefers-reduced-motion.
  */
 @keyframes welcome-pop {
-  0% { opacity: 0; transform: translateY(32px) scale(0.9); }
-  60% { opacity: 1; }
-  80% { transform: translateY(-5px) scale(1.012); }
+  0% { opacity: 0; transform: translateY(24px) scale(0.94); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes welcome-halo {
@@ -164,7 +162,7 @@
   100% { background-position: 200% 50%; }
 }
 .welcome-pop {
-  animation: welcome-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: welcome-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .welcome-halo {
   filter: blur(44px);
@@ -179,7 +177,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: welcome-shimmer 6s linear 0.8s infinite;
+  /* One elegant sweep per appearance, then the gradient rests */
+  animation: welcome-shimmer 2.6s cubic-bezier(0.4, 0, 0.2, 1) 0.9s 1 both;
 }
 @media (prefers-reduced-motion: reduce) {
   .welcome-pop,

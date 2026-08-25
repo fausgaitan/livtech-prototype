@@ -36,7 +36,6 @@ export function FeedbackNudge({
         </span>
         <MessageSquareText className="size-4" />
         Vote on the 3 styles
-        <span className="text-xs font-normal text-white/60">~2 min</span>
       </button>
     </div>
   )

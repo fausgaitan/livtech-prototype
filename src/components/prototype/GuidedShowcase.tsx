@@ -248,10 +248,10 @@ function NameStep() {
           Submitting again will update your previous response.
         </p>
       )}
-      <p>Want your feedback attributed? Add your name, then hit Submit.</p>
+      <p>Add your name so we know who this is from, then hit Submit.</p>
       <input
         value={name}
-        placeholder="Your name (optional)"
+        placeholder="Your name"
         onChange={(e) => {
           setName(e.target.value)
           writeFeedback({ name: e.target.value })
@@ -268,9 +268,6 @@ function NameStep() {
           outline: 'none',
         }}
       />
-      <p style={{ fontSize: 12, color: 'rgba(15, 30, 46, 0.55)' }}>
-        Leave it blank to stay anonymous.
-      </p>
     </div>
   )
 }

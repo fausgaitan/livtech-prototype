@@ -185,7 +185,7 @@ async function runTour(name, titles, shot, interact = true) {
 
       // On the name step, leave a name before hitting Submit.
       if (interact && expected === 'One Last Thing') {
-        await page.type('input[placeholder="Your name (optional)"]', 'E2E Tester')
+        await page.type('input[placeholder="Your name"]', 'E2E Tester')
         await new Promise((r) => setTimeout(r, 200))
       }
 
