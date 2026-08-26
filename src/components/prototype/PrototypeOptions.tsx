@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   SlidersHorizontal,
   Compass,
@@ -36,6 +36,12 @@ export function PrototypeOptions() {
   const [, setResetTick] = useState(0)
   const { variant, setVariant } = useVariant()
   const { startTour, tourActive } = useGuidedShowcase()
+
+  // Tours can start from outside this panel (feedback nudge, welcome modal).
+  // Close the popover so it doesn't linger behind the tour tooltip.
+  useEffect(() => {
+    if (tourActive) setOpen(false)
+  }, [tourActive])
 
   return (
     <div className="fixed right-5 bottom-5 z-40 flex flex-col items-end gap-2">
