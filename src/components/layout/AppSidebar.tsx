@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 
@@ -146,8 +147,12 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   <item.icon className="size-4 opacity-60" />
                 </button>
 
-                {/* Submenu popover — fixed so it escapes the rail's overflow clip */}
-                {item.children && flyout?.label === item.label && (
+                {/* Submenu popover — portaled to <body>: inside the aside,
+                    Option C's backdrop-blur makes the rail the containing
+                    block for fixed descendants, clipping the flyout. */}
+                {item.children &&
+                  flyout?.label === item.label &&
+                  createPortal(
                   <div
                     // 8px visible gap to the rail; never closer than 8px below
                     // the topbar (67px) so the top gap matches the left gap.
@@ -205,7 +210,8 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                         })}
                       </ul>
                     </div>
-                  </div>
+                  </div>,
+                  document.body,
                 )}
               </div>
             ))}
