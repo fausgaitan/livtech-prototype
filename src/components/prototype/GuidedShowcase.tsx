@@ -447,10 +447,10 @@ const uxSteps: Step[] = [
       <StepList
         lead="Try it now:"
         items={[
-          'Hover the sidebar, then click Collapse at the bottom',
+          'Click Collapse at the bottom of the sidebar',
           'Navigation folds into a compact icon rail',
           'More room for the content that matters',
-          'Hover Clinical or CRM while collapsed to see its submenu',
+          'Hover the icons for tooltips and submenus',
         ]}
       />
     ),

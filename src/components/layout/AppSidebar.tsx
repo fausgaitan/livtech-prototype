@@ -16,6 +16,60 @@ type AppSidebarProps = {
   onToggle: () => void
 }
 
+/**
+ * Styled hover tooltip for collapsed-rail icons that have no submenu flyout.
+ * Portaled to <body> for the same reason as the flyout: Option C's
+ * backdrop-blur makes the rail the containing block for fixed descendants.
+ */
+function RailTooltip({
+  label,
+  light,
+  isGradient,
+  children,
+}: {
+  label: string
+  light: boolean
+  isGradient: boolean
+  children: React.ReactNode
+}) {
+  const [top, setTop] = useState<number | null>(null)
+
+  return (
+    <div
+      className="flex w-full justify-center"
+      onMouseEnter={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setTop(rect.top + rect.height / 2)
+      }}
+      onMouseLeave={() => setTop(null)}
+    >
+      {children}
+      {top !== null &&
+        createPortal(
+          <div
+            className={cn(
+              'pointer-events-none fixed z-50 -translate-y-1/2 pl-2',
+              isGradient ? 'left-[74px]' : 'left-[56px]',
+            )}
+            style={{ top }}
+          >
+            <div
+              className={cn(
+                'rounded-md border px-2.5 py-1.5 text-xs font-medium whitespace-nowrap shadow-md animate-in fade-in slide-in-from-left-1 duration-150',
+                light
+                  ? 'border-black/5 bg-white text-black'
+                  : 'border-white/10 bg-[#27115a] text-white',
+              )}
+            >
+              {label}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </div>
+  )
+}
+
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -120,18 +174,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         /* ---------- Collapsed rail ---------- */
         <div className="flex min-h-0 w-[56px] flex-1 flex-col items-center animate-in fade-in slide-in-from-left-2 duration-300">
           <nav className="flex flex-1 flex-col items-center gap-2.5 py-2">
-            {primaryNav.map((item) => (
-              <div
-                key={item.label}
-                className="flex w-full justify-center"
-                onMouseEnter={(e) =>
-                  item.children &&
-                  openFlyout(item.label, e.currentTarget.getBoundingClientRect().top)
-                }
-                onMouseLeave={scheduleFlyoutClose}
-              >
+            {primaryNav.map((item) => {
+              const iconButton = (
                 <button
-                  title={item.children ? undefined : item.label}
                   onClick={() => item.defaultPath && navigate(item.defaultPath)}
                   className={cn(
                     'flex size-8 items-center justify-center rounded-[10px] transition-colors',
@@ -146,6 +191,33 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                 >
                   <item.icon className="size-4 opacity-60" />
                 </button>
+              )
+
+              // Leaf items get a tooltip; group items get the submenu flyout
+              // (its header already names the group).
+              if (!item.children) {
+                return (
+                  <RailTooltip
+                    key={item.label}
+                    label={item.label}
+                    light={light}
+                    isGradient={isGradient}
+                  >
+                    {iconButton}
+                  </RailTooltip>
+                )
+              }
+
+              return (
+              <div
+                key={item.label}
+                className="flex w-full justify-center"
+                onMouseEnter={(e) =>
+                  openFlyout(item.label, e.currentTarget.getBoundingClientRect().top)
+                }
+                onMouseLeave={scheduleFlyoutClose}
+              >
+                {iconButton}
 
                 {/* Submenu popover — portaled to <body>: inside the aside,
                     Option C's backdrop-blur makes the rail the containing
@@ -214,31 +286,39 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   document.body,
                 )}
               </div>
-            ))}
+              )
+            })}
           </nav>
 
           <div className="flex shrink-0 flex-col items-center gap-2.5 py-5">
-            <button
-              title="Expand"
-              onClick={onToggle}
-              className={cn(
-                'pointer-events-none flex size-8 items-center justify-center rounded-[10px] opacity-0 transition-[opacity,background-color] duration-200 group-hover/sidebar:pointer-events-auto group-hover/sidebar:opacity-100',
-                light ? 'hover:bg-black/5' : 'hover:bg-white/10',
-              )}
-            >
-              <ChevronsRight className="size-4 opacity-60" />
-            </button>
-            {footerNav.map((item) => (
+            {/* Ever-present per client feedback — no hover reveal */}
+            <RailTooltip label="Expand" light={light} isGradient={isGradient}>
               <button
-                key={item.label}
-                title={item.label}
+                onClick={onToggle}
                 className={cn(
                   'flex size-8 items-center justify-center rounded-[10px] transition-colors',
                   light ? 'hover:bg-black/5' : 'hover:bg-white/10',
                 )}
               >
-                <item.icon className="size-4 opacity-60" />
+                <ChevronsRight className="size-4 opacity-60" />
               </button>
+            </RailTooltip>
+            {footerNav.map((item) => (
+              <RailTooltip
+                key={item.label}
+                label={item.label}
+                light={light}
+                isGradient={isGradient}
+              >
+                <button
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-[10px] transition-colors',
+                    light ? 'hover:bg-black/5' : 'hover:bg-white/10',
+                  )}
+                >
+                  <item.icon className="size-4 opacity-60" />
+                </button>
+              </RailTooltip>
             ))}
           </div>
         </div>
@@ -325,10 +405,11 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           </nav>
 
           <div className="flex shrink-0 flex-col gap-1 p-2">
+            {/* Ever-present per client feedback — no hover reveal */}
             <button
               onClick={onToggle}
               className={cn(
-                'pointer-events-none flex h-8 w-full items-center gap-2 rounded-md p-2 text-left text-sm opacity-0 transition-[opacity,background-color] duration-200 group-hover/sidebar:pointer-events-auto group-hover/sidebar:opacity-100',
+                'flex h-8 w-full items-center gap-2 rounded-md p-2 text-left text-sm transition-colors',
                 light
                   ? 'text-black/90 hover:bg-black/5'
                   : 'text-white/90 hover:bg-white/10',
