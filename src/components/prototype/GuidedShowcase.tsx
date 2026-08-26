@@ -94,7 +94,11 @@ export function hasSubmittedFeedback() {
  * next submission creates a NEW spreadsheet row rather than editing the old.
  */
 export function resetFeedback() {
+  // Keep the submissionId: a post-reset re-submission then UPDATES the same
+  // spreadsheet row (upsert) instead of appending an orphan duplicate.
+  const { submissionId } = readFeedback()
   localStorage.removeItem(FEEDBACK_KEY)
+  if (submissionId) writeFeedback({ submissionId })
   ensureSubmissionId()
 }
 

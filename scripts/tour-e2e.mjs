@@ -329,11 +329,12 @@ const afterReset = await page.evaluate((prevId) => {
   return {
     tagGone: !document.body.innerText.includes('Submitted ✓'),
     answersCleared: !fb.submittedAt && !fb.favorite,
-    freshId: Boolean(fb.submissionId) && fb.submissionId !== prevId,
+    // Identity survives reset so re-submissions upsert the same sheet row.
+    sameId: fb.submissionId === prevId,
   }
 }, oldId)
 console.log('after reset:', JSON.stringify(afterReset))
-if (!afterReset.tagGone || !afterReset.answersCleared || !afterReset.freshId)
+if (!afterReset.tagGone || !afterReset.answersCleared || !afterReset.sameId)
   failures++
 
 // --- Welcome modal skip path: nudge keeps pushing for the vote ---------------
